@@ -1,0 +1,118 @@
+#lang racket
+
+(require "AsipMain.rkt")
+
+;;The power delivery to each wheel should be
+;;∙ leftWheel= power- (currentError * 𝐾p)
+;;∙ rightWheel=power+ (currentError * 𝐾p)
+
+(define pPower 175)
+
+(define Kp 0.058)
+
+(define oldError 0)
+
+(define (leftWheel power currentError Kp) (- power (* currentError Kp)))
+
+(define (rightWheel power currentError Kp) (+ power (* currentError Kp)))
+
+(define (currentError valueLeft valueMiddle valueRight)
+  (cond ( (> (+ valueLeft valueMiddle valueRight) 0)
+          (/ (+ (* 0 valueLeft) (* 2000 valueMiddle) (* 4000 valueRight))
+             (+ valueLeft valueMiddle valueRight)))
+        (else oldError)
+        )
+  )
+
+
+;; ---------------------------------------------------------
+;; A simple control loop to print the value of IR sensors
+;; every 2 seconds (interval can be modified
+;; ---------------------------------------------------------
+
+
+(define previousTime (current-inexact-milliseconds))
+
+(define currentTime 0)
+
+;; How often should we print?
+(define interval 10)
+
+(define cutOff 55)
+
+(define trimIR
+  (λ (x)
+    (cond ( (> x cutOff)
+            x
+            )
+          (else 0)
+          )
+    )
+  )
+
+
+;; The list of IR sensors (used in map below)
+(define irSensors (list 0 1 2))
+
+(define (irLoop)
+  (set! currentTime (current-inexact-milliseconds))
+  
+  (cond 
+    ((> (- currentTime previousTime) interval)
+     ;; We use a map function to print the value
+     
+     
+     (define leftIR (trimIR (getIR 2))  )
+     (define middleIR (trimIR (getIR 1))  )
+     (define rightIR (trimIR (getIR 0))  )
+     
+     (define curErr (currentError leftIR middleIR rightIR))
+     
+     (define correction (inexact->exact (round (* (- curErr 4000) Kp))))
+     ;;     (map (lambda (i) (printf "IR sensor ~a; " i))  (list leftIR middleIR rightIR))
+     ;;     (printf "\n Error = ~a\n Correction=~a \n" curErr correction)
+     
+     
+     (cond ( (> correction 0)
+             ;;             (printf "Setting motors to ~a ~a" (- (- pPower correction)) pPower)
+             (setMotors (- (- pPower correction)) pPower )
+             )
+           ( (< correction 0)
+             ;;             (printf "Setting motors to ~a ~a" (- pPower) (+ pPower correction))
+             (setMotors (- pPower) (+ pPower correction))
+             )
+           (else (setMotors (- pPower) pPower))
+           )
+     (set! previousTime (current-inexact-milliseconds))
+     (set! oldError curErr)
+     )
+    )
+  
+  
+  
+  ;; Required in Win
+  (sleep 0.02)
+  
+  ;; As above, a little trick to exit when both bump sensors are pressed
+  ;; (cond 
+  ;;   ((not (and (leftBump?) (rightBump?)))
+  (irLoop)
+  ) 
+
+(define (minimalLoop)
+  (open-asip)
+  
+  ;; let ’s take things easy ...
+  (sleep 0.2)
+  (enableIR 10)
+  (sleep 0.2)
+  
+  (setMotors (- pPower) pPower)
+  ;; half a second to stabilise
+  (sleep 0.5)
+  
+  (irLoop)
+  (close-asip)
+  )
+
+(minimalLoop)

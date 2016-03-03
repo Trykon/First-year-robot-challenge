@@ -1,0 +1,9 @@
+#lang racket
+
+(require "AsipMain.rkt")
+
+(define (mainloop)
+  (loop)
+  )
+(define (loop) (send a-key-event get-key-code)
+  (loop))

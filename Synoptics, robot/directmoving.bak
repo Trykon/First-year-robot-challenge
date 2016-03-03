@@ -1,0 +1,27 @@
+#lang racket
+
+(require "AsipMain.rkt")#lang racket
+
+(require "AsipMain.rkt")
+
+(define (action x) (cond
+                     ((string? x) (cond
+                                    ((= "right") (setMotors 0 150) (sleep 0.2) (stopMotors))
+                                    ((= "left") (setMotors -150 0) (sleep 0.2) (stopMotors))
+                                    ((= "forward") (setMotors -150 150) (sleep (read)) (stopMotors))
+                                    )
+                                  )
+                     (#t "please put string data")))
+(define (move)
+  (action (read))
+  (move)
+  )
+
+(define (loop)
+  (open-asip)
+  (sleep 0.2)
+  (move)
+  (close-asip)
+  )
+
+(loop)

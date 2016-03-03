@@ -1,0 +1,1 @@
+("6.1" ("c99b9289efec95a0ab773f06d963ff659c8124c4" . "fb96cd20a1abc725f1976c31c15beabc9b06a8e1") (collects #"errortrace" #"errortrace-key.rkt") (collects #"racket" #"system.rkt") (collects #"racket" #"main.rkt") (collects #"file" #"sha1.rkt") #"C:\\Users\\Kamil\\Desktop\\MDX\\Synoptics, robot\\AsipUtilities.rkt" (collects #"racket" #"runtime-config.rkt"))

@@ -1,0 +1,19 @@
+#lang racket
+
+(require "AsipMain.rkt")
+
+(define (3p4)
+  (open-asip)
+  (setMotors -150 150)
+  (sleep 0.5)
+  (setMotors 150 -150)
+  (sleep 0.5)
+  (stopMotors)
+  (sleep 1)
+  (setMotor 1 150)
+  (sleep 0.5)
+  (setMotor 1 -150)
+  (sleep 0.5)
+  (stopMotors)
+  (close-asip)
+  )

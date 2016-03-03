@@ -1,0 +1,19 @@
+#lang racket
+
+(require "AsipMain.rkt")
+
+(define (sensorsLoop)
+  (cond
+    ((leftBump?) (printf "Left bump pressed\n"))
+    ((rightBump?) (printf "Right bump pressed\n"))
+    )
+  (sleep 0.05)
+  (sensorsLoop)
+  )
+
+(define (minimalLoop)
+  (open-asip)
+  (enableBumpers 100)
+  (sensorsLoop)
+  (close-asip)
+  )
